@@ -1,0 +1,20 @@
+{
+  "allFiles": [
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/FluxProEngine8BP/app/src/main/jni/menu.h",
+      "selection": {
+        "end": {
+          "column": 56,
+          "index": 6778,
+          "line": 201
+        },
+        "start": {
+          "column": 56,
+          "index": 6778,
+          "line": 201
+        }
+      }
+    }
+  ],
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/FluxProEngine8BP/app/src/main/jni/menu.h"
+}
