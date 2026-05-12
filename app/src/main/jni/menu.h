@@ -209,7 +209,6 @@ static void ApplyTheme() {
     style.Colors[ImGuiCol_TitleBgCollapsed] = theme.secondary;
     // Popups
     style.Colors[ImGuiCol_PopupBg] = theme.background;
-    style.Colors[ImGuiCol_PopupBgBorder] = theme.secondary;
 }
 
 struct MenuState {
@@ -278,7 +277,7 @@ static bool SidebarButton(const char* label, GLuint iconTex, bool selected, floa
     const ImGuiStyle& style = g.Style;
     const ImGuiID id = window->GetID(label);
 
-    float scaleFactor = GetResponsiveFontScale(io);
+    float scaleFactor = GetResponsiveFontScale(g.IO);
     float iconSize   = 40.0f * scaleFactor;
     float vPad       = 10.0f * scaleFactor;
     float btnH       = vPad * 2.0f + iconSize + g.FontSize * scaleFactor;
@@ -583,7 +582,7 @@ static void DrawSidebar(float sidebarW, ImVec2 screenSize) {
     ImDrawList*   dl = GetWindowDrawList();
     ImVec2        wp = GetWindowPos();
 
-    float scaleFactor = GetResponsiveFontScale(screenSize);
+    float scaleFactor = GetResponsiveFontScale(g.IO);
     float closeSize = 28.0f * scaleFactor;
     float closeBtnW = 50.0f * scaleFactor;
     float tabsW     = sidebarW - closeBtnW;
@@ -738,7 +737,7 @@ static void DrawContentArea(float winW, float winH, ImVec2 screenSize) {
     ImDrawList* dl  = GetWindowDrawList();
     ImVec2      wp  = GetWindowPos();
  
-    float scaleFactor = GetResponsiveFontScale(screenSize);
+    float scaleFactor = GetResponsiveFontScale(GImGui->IO);
     float startY   = GetCursorPosY();
     float contentW = winW;
  
@@ -800,8 +799,8 @@ static void DrawContentArea(float winW, float winH, ImVec2 screenSize) {
                 PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
                 PushStyleVar(ImGuiStyleVar_GrabRounding, 8.0f);
                 PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.12f, 0.12f, 0.15f, 1.0f));
-                PushStyleColor(ImGuiCol_SliderGrab, ImVec4(g_menu.accentCol.x, g_menu.accentCol.y, g_menu.accentCol.z, 1.0f));
-                PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(g_menu.accentCol.x * 0.8f, g_menu.accentCol.y * 0.8f, g_menu.accentCol.z * 0.8f, 1.0f));
+                PushStyleColor(ImGuiCol_SliderGrab, ImVec4(g_menu.accentColor.x, g_menu.accentColor.y, g_menu.accentColor.z, 1.0f));
+                PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(g_menu.accentColor.x * 0.8f, g_menu.accentColor.y * 0.8f, g_menu.accentColor.z * 0.8f, 1.0f));
                 SetNextItemWidth(GetContentRegionAvail().x);
                 need_save |= SliderInt(T("##lineThick"), &persistent_int[O("iLineThickness")], 1, 10, "%d");
                 PopStyleColor(3);
@@ -815,8 +814,8 @@ static void DrawContentArea(float winW, float winH, ImVec2 screenSize) {
                 PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
                 PushStyleVar(ImGuiStyleVar_GrabRounding, 8.0f);
                 PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.12f, 0.12f, 0.15f, 1.0f));
-                PushStyleColor(ImGuiCol_SliderGrab, ImVec4(g_menu.accentCol.x, g_menu.accentCol.y, g_menu.accentCol.z, 1.0f));
-                PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(g_menu.accentCol.x * 0.8f, g_menu.accentCol.y * 0.8f, g_menu.accentCol.z * 0.8f, 1.0f));
+                PushStyleColor(ImGuiCol_SliderGrab, ImVec4(g_menu.accentColor.x, g_menu.accentColor.y, g_menu.accentColor.z, 1.0f));
+                PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(g_menu.accentColor.x * 0.8f, g_menu.accentColor.y * 0.8f, g_menu.accentColor.z * 0.8f, 1.0f));
                 SetNextItemWidth(GetContentRegionAvail().x);
                 int& menuSz = persistent_int[O("iMenuSizeOffset")];
                 bool changed = SliderInt(T("##menuSize"), &menuSz, -10, 10,
@@ -829,9 +828,9 @@ static void DrawContentArea(float winW, float winH, ImVec2 screenSize) {
             Dummy(ImVec2(0, 16 * scaleFactor));
             {
                 PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);
-                PushStyleColor(ImGuiCol_Button,        ImVec4(g_menu.accentCol.x * 0.4f, g_menu.accentCol.y * 0.4f, g_menu.accentCol.z * 0.4f, 1.0f));
-                PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(g_menu.accentCol.x * 0.5f, g_menu.accentCol.y * 0.5f, g_menu.accentCol.z * 0.5f, 1.0f));
-                PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(g_menu.accentCol.x * 0.3f, g_menu.accentCol.y * 0.3f, g_menu.accentCol.z * 0.3f, 1.0f));
+                PushStyleColor(ImGuiCol_Button,        ImVec4(g_menu.accentColor.x * 0.4f, g_menu.accentColor.y * 0.4f, g_menu.accentColor.z * 0.4f, 1.0f));
+                PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(g_menu.accentColor.x * 0.5f, g_menu.accentColor.y * 0.5f, g_menu.accentColor.z * 0.5f, 1.0f));
+                PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(g_menu.accentColor.x * 0.3f, g_menu.accentColor.y * 0.3f, g_menu.accentColor.z * 0.3f, 1.0f));
                 if (Button(T("save_config"), ImVec2(GetContentRegionAvail().x, 45.0f * scaleFactor))) {
                     svConfig_Save();
                 }
