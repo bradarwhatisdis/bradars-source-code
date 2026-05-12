@@ -947,9 +947,7 @@ static void DrawContentArea(float winW, float winH, ImVec2 screenSize) {
                     T("language_vietnamese")
                 };
                 int& langCombo = *(int*)(&g_currentLanguage); // Hack to use enum as int for combo
-                bool lang_changed = Combo(T("##language_combo"), &langCombo, 
-                                        language_items[0], language_items[1], language_items[2], 
-                                        language_items[3], language_items[4], language_items[5]);
+                bool lang_changed = Combo(T("##language_combo"), &langCombo, language_items, IM_ARRAYSIZE(language_items));
                 if (lang_changed) {
                     g_currentLanguage = static_cast<Language>(langCombo);
                     need_save = true; // Save language preference
@@ -976,9 +974,7 @@ static void DrawContentArea(float winW, float winH, ImVec2 screenSize) {
                     T("theme_midnight_purple"),
                     T("theme_gold_edition")
                 };
-                bool theme_changed = Combo(T("##theme_combo"), &g_currentTheme, 
-                                         theme_items[0], theme_items[1], theme_items[2], 
-                                         theme_items[3], theme_items[4]);
+                bool theme_changed = Combo(T("##theme_combo"), &g_currentTheme, theme_items, IM_ARRAYSIZE(theme_items));
                 if (theme_changed) {
                     need_save = true; // Save theme preference
                 }
@@ -1053,21 +1049,6 @@ INLINE void DrawMenu(ImGuiIO& io) {
 }
 
 
-
-        if (clicked) {
-            if (cancelMode) {
-                persistent_bool[O("bAutoQueue")] = false;
-                g_aqCounting = false;
-            } else {
-                // Toggle autoplay
-                persistent_bool[O("bAutoPlay")] = !persistent_bool[O("bAutoPlay")];
-            }
-        }
-    }
-    End();
-    PopStyleVar();
-    PopStyleColor(2);
-}
 
 static void DrawFloatingButton(ImGuiIO& io) {
     static GLuint logo_tex   = LoadTextureFromMemory(logo_png, logo_png_len);
