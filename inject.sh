@@ -8,10 +8,10 @@ OUTPUT_DIR="output"
 KEYSTORE="tmp.jks"
 
 # 1. Cek dependencies (biar tidak install ulang terus)
-for tool in zipalign 7z apksigner; do
+for tool in zipalign apksigner; do
     if ! command -v $tool &> /dev/null; then
         echo "📦 Memasang $tool..."
-        sudo apt install zipalign p7z-full apksigner -y
+        sudo apt install zipalign apksigner -y
     fi
 done
 
