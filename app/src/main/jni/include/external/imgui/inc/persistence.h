@@ -71,7 +71,7 @@ static std::map<std::string, bool> persistent_bool = {
     {"bESP_DrawPocketsShotState", true},
 
     {"bAIM", true},
-    {"bAutoPlay", false},
+
 
     {"bImguiAutoSave", true},
     {"bAlwaysAutoResize", true},

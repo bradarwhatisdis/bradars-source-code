@@ -2,6 +2,8 @@
 
 #include <Vector/Vectors.h>
 #include <imgui/imgui.h>
+#include <map>
+#include <string>
 
 #include "icons/icons.h"
 
@@ -22,6 +24,194 @@ using namespace std;
 #include <sys/system_properties.h>
 #include <ctime>
 
+// Translation System
+enum class Language { ENGLISH, INDONESIAN, SPANISH, PORTUGUESE, TURKISH, VIETNAMESE };
+static Language g_currentLanguage = Language::ENGLISH;
+
+// Simple translation map - in practice, this would be more comprehensive
+static const char* T(const char* key) {
+    static map<Language, map<string, string>> translations = {
+        { Language::ENGLISH, {
+            {"draw_settings", "Draw Settings"},
+            {"auto_play", "Auto Play"},
+            {"auto_queue", "Auto Queue"},
+            {"user", "User"},
+            {"draw_lines", "Draw Lines"},
+            {"draw_pockets", "Draw Pockets"},
+            {"line_thickness", "Line Thickness"},
+            {"fix_menu_size", "Fix Menu Size"},
+            {"save_config", "Save Config"},
+
+            {"device", "Device"},
+            {"manufacturer", "Manufacturer:"},
+            {"model", "Model:"},
+            {"abi", "ABI:"},
+            {"android", "Android:"},
+            {"bradar_s_cheat", "Bradar's Cheat"},
+            {"expire", "Expire:"},
+            {"owner", "Owner : @profambatukam"},
+            {"beware_scammers", "Beware of Scammers. This is a FREE BETA version, if you bought this version it means you got scammed."},
+            {"your_will_read", "Your will read"},
+            {"copy_license_key", "Copy your license key and tap login"},
+            {"authenticating", "Authenticating..."},
+            {"login", "Login"},
+            {"mod_expired", "MOD EXPIRED"},
+            {"beta_version_expired", "Beta Version Expired. Update on our Telegram Your Id"},
+            {"calculating", "CALCULATING..."},
+            {"close_menu", "Close Menu"},
+            // Theme names
+            {"theme_default", "Default"},
+            {"theme_neon_red", "Neon Red"},
+            {"theme_deep_ocean", "Deep Ocean"},
+            {"theme_midnight_purple", "Midnight Purple"},
+            {"theme_gold_edition", "Gold Edition"},
+            // Language names
+            {"language_english", "English"},
+            {"language_indonesian", "Indonesian"},
+            {"language_spanish", "Spanish"},
+            {"language_portuguese", "Portuguese"},
+            {"language_turkish", "Turkish"},
+            {"language_vietnamese", "Vietnamese"},
+            // Theme and language labels
+            {"theme", "Theme"},
+            {"language", "Language"}
+        }},
+        { Language::INDONESIAN, {
+            {"draw_settings", "Pengaturan Gambar"},
+            {"auto_play", "Main Otomatis"},
+            {"auto_queue", "Antrian Otomatis"},
+            {"user", "Pengguna"},
+            {"draw_lines", "Gambar Garis"},
+            {"draw_pockets", "Gambar Lubang"},
+            {"line_thickness", "Ketebalan Garis"},
+            {"fix_menu_size", "Ukuran Menu Tetap"},
+            {"save_config", "Simpan Konfigurasi"},
+
+            {"mode", "Mode"},
+            {"bet_percent", "Persentase Taruhan"},
+            {"select_table", "Pilih Meja"},
+            {"last_selected", "Terakhir Dipilih"},
+            {"smart", "Pintar"},
+            {"fix_table", "Meja Tetap"},
+            {"you_will_be_auto_queued", "Anda akan otomatis diantrekan ke"},
+            {"the_last_game_mode", "mode permainan terakhir yang Anda mainkan"},
+            {"device", "Perangkat"},
+            {"manufacturer", "Produsen:"},
+            {"model", "Model:"},
+            {"abi", "ABI:"},
+            {"android", "Android:"},
+            {"bradar_s_cheat", "Trik Bradar"},
+            {"expire", "Kadaluarsa:"},
+            {"owner", "Pemilik : @profambatukam"},
+            {"beware_scammers", "Waspadai Penipu. Ini adalah versi BETA GRATIS, jika Anda membeli versi ini berarti Anda telah dicurangi."},
+            {"your_will_read", "Anda akan membaca"},
+            {"copy_license_key", "Salin lisensi kunci dan ketuk login"},
+            {"authenticating", "Sedang Mengautentikasi..."},
+            {"login", "Masuk"},
+            {"mod_expired", "MOD KADALUARSA"},
+            {"beta_version_expired", "Versi BETA Kadaluarsa. Perbarui di Telegram Kami Id Anda"},
+            {"calculating", "SEDANG MENGHITUNG..."},
+            {"close_menu", "Tutup Menu"},
+            // Theme names
+            {"theme_default", "Default"},
+            {"theme_neon_red", "Merah Neon"},
+            {"theme_deep_ocean", "Lautan Dalam"},
+            {"theme_midnight_purple", "Ungu Tengah Malam"},
+            {"theme_gold_edition", "Edisi Emas"},
+            // Language names
+            {"language_english", "Inggris"},
+            {"language_indonesian", "Indonesia"},
+            {"language_spanish", "Spanyol"},
+            {"language_portuguese", "Portugis"},
+            {"language_turkish", "Turki"},
+            {"language_vietnamese", "Vietnam"},
+            // Theme and language labels
+            {"theme", "Tema"},
+            {"language", "Bahasa"}
+        }}
+        // Other languages would follow similar pattern
+    };
+
+    auto langIt = translations.find(g_currentLanguage);
+    if (langIt != translations.end()) {
+        auto keyIt = langIt->second.find(key);
+        if (keyIt != langIt->second.end()) {
+            return keyIt->second.c_str();
+        }
+    }
+    // Fallback to English
+    auto engIt = translations.find(Language::ENGLISH);
+    if (engIt != translations.end()) {
+        auto keyIt = engIt->second.find(key);
+        if (keyIt != engIt->second.end()) {
+            return keyIt->second.c_str();
+        }
+    }
+    return key; // Last resort
+}
+
+// Theme System
+struct Theme {
+    ImVec4 primary;
+    ImVec4 secondary;
+    ImVec4 background;
+    ImVec4 text;
+    ImVec4 accent;
+};
+
+// Predefined themes
+static Theme g_themes[] = {
+    // Default (matching original)
+    { ImVec4(0.90f, 0.20f, 0.35f, 1.0f), ImVec4(0.15f, 0.15f, 0.20f, 1.0f), ImVec4(0.08f, 0.08f, 0.10f, 1.0f), ImVec4(0.90f, 0.90f, 0.95f, 1.0f), ImVec4(0.90f, 0.20f, 0.35f, 1.0f) },
+    // Neon Red
+    { ImVec4(1.0f, 0.0f, 0.5f, 1.0f), ImVec4(0.2f, 0.0f, 0.3f, 1.0f), ImVec4(0.1f, 0.1f, 0.15f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 0.0f, 0.5f, 1.0f) },
+    // Deep Ocean
+    { ImVec4(0.0f, 0.5f, 1.0f, 1.0f), ImVec4(0.0f, 0.2f, 0.4f, 1.0f), ImVec4(0.05f, 0.05f, 0.1f, 1.0f), ImVec4(0.8f, 0.8f, 0.9f, 1.0f), ImVec4(0.0f, 0.5f, 1.0f, 1.0f) },
+    // Midnight Purple
+    { ImVec4(0.6f, 0.0f, 0.8f, 1.0f), ImVec4(0.2f, 0.0f, 0.3f, 1.0f), ImVec4(0.05f, 0.05f, 0.1f, 1.0f), ImVec4(0.9f, 0.9f, 1.0f, 1.0f), ImVec4(0.6f, 0.0f, 0.8f, 1.0f) },
+    // Gold Edition
+    { ImVec4(1.0f, 0.84f, 0.0f, 1.0f), ImVec4(0.3f, 0.25f, 0.0f, 1.0f), ImVec4(0.1f, 0.1f, 0.15f, 1.0f), ImVec4(0.9f, 0.9f, 0.9f, 1.0f), ImVec4(1.0f, 0.84f, 0.0f, 1.0f) }
+};
+
+static int g_currentTheme = 0; // Index into g_themes
+
+// Function to apply theme to ImGui
+static void ApplyTheme() {
+    if (g_currentTheme < 0 || g_currentTheme >= IM_ARRAYSIZE(g_themes)) return;
+    Theme& theme = g_themes[g_currentTheme];
+    
+    ImGuiStyle& style = ImGui::GetStyle();
+    // Window
+    style.Colors[ImGuiCol_WindowBg] = theme.background;
+    style.Colors[ImGuiCol_Border] = theme.secondary;
+    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+    // Text
+    style.Colors[ImGuiCol_Text] = theme.text;
+    style.Colors[ImGuiCol_TextDisabled] = ImVec4(theme.text.x * 0.5f, theme.text.y * 0.5f, theme.text.z * 0.5f, theme.text.w * 0.5f);
+    // Frames
+    style.Colors[ImGuiCol_FrameBg] = theme.secondary;
+    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(theme.secondary.x * 1.1f, theme.secondary.y * 1.1f, theme.secondary.z * 1.1f, theme.secondary.w);
+    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(theme.secondary.x * 1.2f, theme.secondary.y * 1.2f, theme.secondary.z * 1.2f, theme.secondary.w);
+    // Buttons
+    style.Colors[ImGuiCol_Button] = theme.secondary;
+    style.Colors[ImGuiCol_ButtonHovered] = theme.primary;
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4(theme.primary.x * 0.8f, theme.primary.y * 0.8f, theme.primary.z * 0.8f, theme.primary.w);
+    // Headers
+    style.Colors[ImGuiCol_Header] = theme.secondary;
+    style.Colors[ImGuiCol_HeaderHovered] = theme.primary;
+    style.Colors[ImGuiCol_HeaderActive] = theme.primary;
+    // Sliders
+    style.Colors[ImGuiCol_SliderGrab] = theme.primary;
+    style.Colors[ImGuiCol_SliderGrabActive] = theme.primary;
+    // Title
+    style.Colors[ImGuiCol_TitleBg] = theme.secondary;
+    style.Colors[ImGuiCol_TitleBgActive] = theme.primary;
+    style.Colors[ImGuiCol_TitleBgCollapsed] = theme.secondary;
+    // Popups
+    style.Colors[ImGuiCol_PopupBg] = theme.background;
+    style.Colors[ImGuiCol_PopupBgBorder] = theme.secondary;
+}
+
 struct MenuState {
     bool isOpen = false;
     int currentTab = 0;
@@ -37,21 +227,21 @@ static MenuState g_menu;
 
 INLINE float GetResponsiveWidth(ImGuiIO& io) {
     float screenW = io.DisplaySize.x;
-    if (screenW <= 720.0f) return 380.0f;
-    if (screenW <= 1080.0f) return 450.0f;
-    return 520.0f;
+    if (screenW <= 720.0f) return 320.0f; // Reduced for better landscape feel
+    if (screenW <= 1080.0f) return 380.0f;
+    return 440.0f;
 }
 
 INLINE float GetResponsiveHeight(ImGuiIO& io) {
     float screenH = io.DisplaySize.y;
-    if (screenH <= 720.0f) return 420.0f;
-    if (screenH <= 1080.0f) return 480.0f;
-    return 540.0f;
+    if (screenH <= 720.0f) return 400.0f;
+    if (screenH <= 1080.0f) return 460.0f;
+    return 520.0f;
 }
 
 INLINE float GetResponsiveFontScale(ImGuiIO& io) {
     float screenW = io.DisplaySize.x;
-    if (screenW <= 720.0f) return 0.85f;
+    if (screenW <= 720.0f) return 0.9f;
     if (screenW <= 1080.0f) return 0.95f;
     return 1.0f;
 }
@@ -79,6 +269,7 @@ static void DrawGradientRect(ImDrawList* dl, ImVec2 p1, ImVec2 p2, ImU32 col1, I
     }
 }
 
+// Modernized SidebarButton with better touch targets and animation
 static bool SidebarButton(const char* label, GLuint iconTex, bool selected, float width, ImVec2 screenSize) {
     ImGuiWindow* window = GetCurrentWindow();
     if (window->SkipItems) return false;
@@ -87,10 +278,10 @@ static bool SidebarButton(const char* label, GLuint iconTex, bool selected, floa
     const ImGuiStyle& style = g.Style;
     const ImGuiID id = window->GetID(label);
 
-    float scaleFactor = screenSize.x <= 720.0f ? 0.75f : (screenSize.x <= 1080.0f ? 0.85f : 1.0f);
-    float iconSize   = 45.0f * scaleFactor;
-    float vPad       = 8.0f * scaleFactor;
-    float btnH       = vPad + iconSize + 4.0f + g.FontSize * scaleFactor + vPad;
+    float scaleFactor = GetResponsiveFontScale(io);
+    float iconSize   = 40.0f * scaleFactor;
+    float vPad       = 10.0f * scaleFactor;
+    float btnH       = vPad * 2.0f + iconSize + g.FontSize * scaleFactor;
 
     ImVec2 pos  = window->DC.CursorPos;
     ImVec2 size = ImVec2(width, btnH);
@@ -104,56 +295,66 @@ static bool SidebarButton(const char* label, GLuint iconTex, bool selected, floa
 
     ImDrawList* dl = window->DrawList;
 
+    // Get colors from theme via g_menu (which we'll update to use theme)
     ImVec4 accentCol = g_menu.accentColor;
     ImVec4 bgCol = selected 
-        ? ImVec4(accentCol.x * 0.3f, accentCol.y * 0.3f, accentCol.z * 0.3f, 1.0f)
+        ? ImVec4(accentCol.x * 0.2f, accentCol.y * 0.2f, accentCol.z * 0.2f, 0.6f)
         : ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 
+    // Background
     if (hovered || selected) {
+        ImU32 bgAlpha = selected ? 150 : 80;
         dl->AddRectFilled(bb.Min, bb.Max, IM_COL32(
             (int)(bgCol.x * 255), 
             (int)(bgCol.y * 255), 
             (int)(bgCol.z * 255), 
-            selected ? 180 : 80
-        ), 12.0f);
+            bgAlpha
+        ), 16.0f * scaleFactor);
     }
 
-    float iconBgPad  = 4.0f;
-    float iconBgSize = iconSize + iconBgPad * 2.0f;
-    ImVec2 iconCenter = ImVec2(
-        bb.Min.x + width * 0.5f,
-        bb.Min.y + vPad + iconSize * 0.5f
-    );
-
+    // Icon background (when selected)
     if (selected) {
+        float iconBgSize = iconSize * 1.2f;
+        ImVec2 iconCenter = ImVec2(
+            bb.Min.x + width * 0.5f,
+            bb.Min.y + vPad + iconSize * 0.5f
+        );
         dl->AddRectFilled(
             ImVec2(iconCenter.x - iconBgSize * 0.5f, iconCenter.y - iconBgSize * 0.5f),
             ImVec2(iconCenter.x + iconBgSize * 0.5f, iconCenter.y + iconBgSize * 0.5f),
-            IM_COL32((int)(accentCol.x*255), (int)(accentCol.y*255), (int)(accentCol.z*255), 255), 
-            14.0f * scaleFactor
+            IM_COL32((int)(accentCol.x*255), (int)(accentCol.y*255), (int)(accentCol.z*255), 200), 
+            12.0f * scaleFactor
         );
     }
 
+    // Icon
     if (iconTex) {
-        ImVec2 iconMin = ImVec2(iconCenter.x - iconSize * 0.5f, iconCenter.y - iconSize * 0.5f);
-        ImVec2 iconMax = ImVec2(iconCenter.x + iconSize * 0.5f, iconCenter.y + iconSize * 0.5f);
-        ImU32 tint = selected ? IM_COL32(255, 255, 255, 255) : IM_COL32(200, 200, 210, 255);
-        dl->AddImage((void*)(intptr_t)iconTex, iconMin, iconMax, ImVec2(0,0), ImVec2(1,1));
+        float iconDrawSize = iconSize * 0.9f;
+        ImVec2 iconCenter = ImVec2(
+            bb.Min.x + width * 0.5f,
+            bb.Min.y + vPad + iconSize * 0.5f
+        );
+        ImVec2 iconMin = ImVec2(iconCenter.x - iconDrawSize * 0.5f, iconCenter.y - iconDrawSize * 0.5f);
+        ImVec2 iconMax = ImVec2(iconCenter.x + iconDrawSize * 0.5f, iconCenter.y + iconDrawSize * 0.5f);
+        ImU32 tint = selected ? IM_COL32(255, 255, 255, 255) : IM_COL32(220, 220, 230, 255);
+        dl->AddImage((void*)(intptr_t)iconTex, iconMin, iconMax, ImVec2(0,0), ImVec2(1,1), tint);
     }
 
+    // Label
     ImVec2 labelSize = CalcTextSize(label);
     ImVec2 textPos   = ImVec2(
         bb.Min.x + (width - labelSize.x) * 0.5f,
-        bb.Min.y + vPad + iconSize + 4.0f
+        bb.Min.y + vPad * 2.0f + iconSize
     );
     ImU32 textCol = selected 
         ? IM_COL32(255, 255, 255, 255) 
-        : (hovered ? IM_COL32(200, 200, 210, 255) : IM_COL32(140, 140, 155, 255));
+        : (hovered ? IM_COL32(220, 220, 230, 255) : IM_COL32(160, 160, 170, 255));
     dl->AddText(textPos, textCol, label);
 
     return pressed;
 }
 
+// Modernized ToggleSwitch with theme colors and better touch targets
 static bool ToggleSwitch(const char* label, bool* v, float scaleFactor = 1.0f) {
     ImGuiWindow* window = GetCurrentWindow();
     if (window->SkipItems) return false;
@@ -162,14 +363,15 @@ static bool ToggleSwitch(const char* label, bool* v, float scaleFactor = 1.0f) {
     const ImGuiStyle& style = g.Style;
     const ImGuiID id = window->GetID(label);
 
-    scaleFactor = scaleFactor > 0.0f ? scaleFactor : (g.IO.DisplaySize.x <= 720.0f ? 1.1f : 1.0f);
-    float height = 38.0f * scaleFactor;
-    float width = 64.0f * scaleFactor;
+    // Use responsive scale factor
+    scaleFactor = scaleFactor > 0.0f ? scaleFactor : GetResponsiveFontScale(g.IO);
+    float height = 36.0f * scaleFactor;
+    float width = 56.0f * scaleFactor;
     float radius = height * 0.5f;
 
     ImVec2 textSize = CalcTextSize(label);
     ImVec2 pos = window->DC.CursorPos;
-    ImVec2 size = ImVec2(GetContentRegionAvail().x, ImMax(height, textSize.y) + style.FramePadding.y * 2 + 10.0f);
+    ImVec2 size = ImVec2(GetContentRegionAvail().x, ImMax(height, textSize.y) + style.FramePadding.y * 2 + 8.0f);
 
     const ImRect bb(pos, pos + size);
     ItemSize(size, style.FramePadding.y);
@@ -182,40 +384,48 @@ static bool ToggleSwitch(const char* label, bool* v, float scaleFactor = 1.0f) {
     static std::map<ImGuiID, float> switchAnim;
     float& animT = switchAnim[id];
     float targetT = *v ? 1.0f : 0.0f;
-    animT += (targetT - animT) * g.IO.DeltaTime * 14.0f;
+    animT += (targetT - animT) * g.IO.DeltaTime * 12.0f; // Slightly slower animation
 
     ImDrawList* dl = window->DrawList;
     
+    // Use theme colors
     ImVec4 accentCol = g_menu.accentColor;
     
+    // Hover effect
     if (hovered) {
-        dl->AddRectFilled(bb.Min, bb.Max, IM_COL32(45, 45, 55, 120), 10.0f);
+        dl->AddRectFilled(bb.Min, bb.Max, IM_COL32(
+            (int)(accentCol.x * 30), 
+            (int)(accentCol.y * 30), 
+            (int)(accentCol.z * 30), 
+            60
+        ), radius);
     }
     
-    ImVec2 togglePos = ImVec2(bb.Max.x - width - 15.0f, bb.Min.y + (size.y - height) * 0.5f);
+    // Toggle background
+    ImVec2 togglePos = ImVec2(bb.Max.x - width - 12.0f, bb.Min.y + (size.y - height) * 0.5f);
     ImVec2 toggleEnd = ImVec2(togglePos.x + width, togglePos.y + height);
     
-    ImVec4 offColor = ImVec4(0.20f, 0.20f, 0.25f, 1.0f);
+    ImVec4 offColor = ImVec4(0.18f, 0.18f, 0.22f, 1.0f);
     ImVec4 onColor = ImVec4(accentCol.x, accentCol.y, accentCol.z, 1.0f);
     ImVec4 bgColorV = ImLerp(offColor, onColor, animT);
     dl->AddRectFilled(togglePos, toggleEnd, ImColor(bgColorV), radius);
     
+    // Toggle knob
     float knobX = togglePos.x + radius + (width - height) * animT;
     float knobY = togglePos.y + radius;
-    float knobR = radius - 5.0f;
+    float knobR = radius - 4.0f;
     
-    dl->AddCircleFilled(ImVec2(knobX, knobY), knobR + 3.0f, IM_COL32(0, 0, 0, 50));
+    dl->AddCircleFilled(ImVec2(knobX, knobY), knobR + 2.0f, IM_COL32(0, 0, 0, 30));
     dl->AddCircleFilled(ImVec2(knobX, knobY), knobR, IM_COL32(255, 255, 255, 255));
 
-    dl->AddText(ImVec2(bb.Min.x + 12.0f, bb.Min.y + (size.y - textSize.y) * 0.5f), IM_COL32(230, 230, 240, 255), label);
+    // Label with better spacing
+    dl->AddText(ImVec2(bb.Min.x + 12.0f * scaleFactor, bb.Min.y + (size.y - textSize.y) * 0.5f), 
+                IM_COL32(220, 220, 230, 255), label);
 
     return pressed;
 }
 
-// File-scope so DrawToggleButton cancel can also reset countdown
-static bool g_aqCounting = false;
-static std::chrono::steady_clock::time_point g_aqLastCall;
-static std::chrono::steady_clock::time_point g_aqCountdownStart;
+
 
 
 static bool IsExpired() {
@@ -232,22 +442,22 @@ INLINE void DrawExpired(ImGuiIO& io) {
     PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(30.0f, 30.0f));
     PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-    if (Begin(O("##ExpiredWin"), nullptr,
+    if (Begin(T("##ExpiredWin"), nullptr,
               ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
               ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings |
               ImGuiWindowFlags_AlwaysAutoResize)) {
 
         SetWindowFontScale(1.6f);
-        ImVec2 titleSz = CalcTextSize(O("MOD EXPIRED"));
+        ImVec2 titleSz = CalcTextSize(T("MOD EXPIRED"));
         SetCursorPosX((winW - 60.0f - titleSz.x) * 0.5f);
-        TextColored(ImVec4(1.0f, 0.1f, 0.1f, 1.0f), "%s", O("MOD EXPIRED"));
+        TextColored(ImVec4(1.0f, 0.1f, 0.1f, 1.0f), "%s", T("MOD EXPIRED"));
         SetWindowFontScale(1.0f);
 
         Dummy(ImVec2(0, 16));
 
         PushTextWrapPos(GetCursorPosX() + winW - 60.0f);
         TextColored(ImVec4(0.85f, 0.85f, 0.90f, 1.0f), "%s",
-            O("Beta Version Expired. Update on our Telegram Your Id"));
+            T("Beta Version Expired. Update on our Telegram Your Id"));
         PopTextWrapPos();
 
         Dummy(ImVec2(0, 10));
@@ -257,55 +467,7 @@ INLINE void DrawExpired(ImGuiIO& io) {
     PopStyleColor();
 }
 
-INLINE void DrawAutoQueue() {
-    if ((!g_Token.empty() && !g_Auth.empty() && g_Token == g_Auth) || DEBUG_BYPASS_LOGIN) {
-        auto now = std::chrono::steady_clock::now();
 
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - g_aqLastCall).count() > 500)
-            g_aqCounting = false;
-        g_aqLastCall = now;
-
-        if (!g_aqCounting) {
-            g_aqCounting = true;
-            g_aqCountdownStart = now;
-        }
-
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - g_aqCountdownStart).count();
-        int remaining_ms = 8000 - (int)elapsed;
-
-      // if (remaining_ms <= 0) {
-           // if (sharedMenuManager.getMenuStateId() == 13) PopMenuState(13);
-            //StartLastMatch();
-           // g_aqCounting = false;
-          //  return;
-       // }
-
-        std::string count_str = std::to_string((remaining_ms / 1000) + 1);
-
-        // Minimal auto-sized window, transparent bg — we draw our own rounded rect
-        SetNextWindowPos(ImVec2(Width * 0.5f, Height * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-        PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 1.f));
-        PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(32.0f, 20.0f));
-        PushStyleVar(ImGuiStyleVar_WindowRounding, 24.0f);
-
-        if (Begin(O("##AutoQueueCD"), nullptr,
-                  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-                  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings |
-                  ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImDrawList* dl  = GetWindowDrawList();
-            ImVec2      wp  = GetWindowPos();
-            ImVec2      ws  = GetWindowSize();
-            dl->AddRectFilled(wp, ImVec2(wp.x + ws.x, wp.y + ws.y), IM_COL32(20, 20, 28, 0), 24.0f);
-
-            SetWindowFontScale(3.5f);
-            TextColored(ImVec4(1.f, 0.f, 0.f, 1.0f), "%s", count_str.c_str());
-            SetWindowFontScale(1.0f);
-        }
-        End();
-        PopStyleVar(2);
-        PopStyleColor();
-    }
-}
 
 #include "mod/ButtonClicker.h"
 
@@ -334,10 +496,8 @@ INLINE void DrawESP(ImDrawList* draw) {
         MainStateManager mainStateManager = sharedMainManager.mStateManager;
         if (!mainStateManager) return;
         if (!mainStateManager.isInGame()) {
-        if (persistent_bool[O("bAutoQueue")]) {
-            if (!sharedMenuManager.isInQueue()) DrawAutoQueue();
-            DrawToggleButton(true);  // acts as cancel button for autoqueue
-        } return;
+            // AutoPlay/AutoQueue features removed
+            return;
         }
 
         auto visualCue = sharedGameManager.mVisualCue();
@@ -423,25 +583,25 @@ static void DrawSidebar(float sidebarW, ImVec2 screenSize) {
     ImDrawList*   dl = GetWindowDrawList();
     ImVec2        wp = GetWindowPos();
 
-    float scaleFactor = screenSize.x <= 720.0f ? 0.75f : (screenSize.x <= 1080.0f ? 0.85f : 1.0f);
-    float closeSize = 30.0f * scaleFactor;
-    float closeBtnW = 55.0f * scaleFactor;
+    float scaleFactor = GetResponsiveFontScale(screenSize);
+    float closeSize = 28.0f * scaleFactor;
+    float closeBtnW = 50.0f * scaleFactor;
     float tabsW     = sidebarW - closeBtnW;
     float btnW      = tabsW / 4.0f;
-    float marginB   = 10.0f;
+    float marginB   = 12.0f * scaleFactor;
 
     dl->ChannelsSplit(2);
     dl->ChannelsSetCurrent(1);
 
     BeginGroup();
     SetCursorPos(ImVec2(0.0f, 0.0f));
-    if (SidebarButton(O("Draw"),  draw_icon_tex, g_menu.currentTab == 0, btnW, screenSize)) g_menu.currentTab = 0;
+    if (SidebarButton(T("draw_settings"),  draw_icon_tex, g_menu.currentTab == 0, btnW, screenSize)) g_menu.currentTab = 0;
     SameLine(0, 0);
-    if (SidebarButton(O("Play"),  play_icon_tex, g_menu.currentTab == 1, btnW, screenSize)) g_menu.currentTab = 1;
+    if (SidebarButton(T("auto_play"),  play_icon_tex, g_menu.currentTab == 1, btnW, screenSize)) g_menu.currentTab = 1;
     SameLine(0, 0);
-    if (SidebarButton(O("Queue"), q_icon_tex,    g_menu.currentTab == 2, btnW, screenSize)) g_menu.currentTab = 2;
+    if (SidebarButton(T("auto_queue"), q_icon_tex,    g_menu.currentTab == 2, btnW, screenSize)) g_menu.currentTab = 2;
     SameLine(0, 0);
-    if (SidebarButton(O("User"),  user_icon_tex, g_menu.currentTab == 3, btnW, screenSize)) g_menu.currentTab = 3;
+    if (SidebarButton(T("user"),  user_icon_tex, g_menu.currentTab == 3, btnW, screenSize)) g_menu.currentTab = 3;
     EndGroup();
 
     float sidebarH = GetItemRectMax().y - wp.y;
@@ -449,35 +609,38 @@ static void DrawSidebar(float sidebarW, ImVec2 screenSize) {
     dl->ChannelsSetCurrent(0);
     
     ImVec4 accentCol = g_menu.accentColor;
-    dl->AddRectFilled(wp, ImVec2(wp.x + sidebarW, wp.y + sidebarH), IM_COL32(18, 18, 22, 255), 20.0f * scaleFactor);
+    dl->AddRectFilled(wp, ImVec2(wp.x + sidebarW, wp.y + sidebarH), IM_COL32(18, 18, 22, 255), 16.0f * scaleFactor);
     
+    // Simplified gradient - just a subtle accent at top
     ImVec2 gradientStart(wp.x, wp.y);
-    ImVec2 gradientEnd(wp.x + sidebarW, wp.y + sidebarH * 0.15f);
+    ImVec2 gradientEnd(wp.x + sidebarW, wp.y + sidebarH * 0.1f);
     dl->AddRectFilledMultiColor(
         gradientStart, gradientEnd,
-        IM_COL32((int)(accentCol.x*60), (int)(accentCol.y*60), (int)(accentCol.z*60), 255),
-        IM_COL32((int)(accentCol.x*40), (int)(accentCol.y*40), (int)(accentCol.z*40), 255),
-        IM_COL32((int)(accentCol.x*40), (int)(accentCol.y*40), (int)(accentCol.z*40), 255),
-        IM_COL32((int)(accentCol.x*60), (int)(accentCol.y*60), (int)(accentCol.z*60), 255)
+        IM_COL32((int)(accentCol.x*40), (int)(accentCol.y*40), (int)(accentCol.z*40), 180),
+        IM_COL32((int)(accentCol.x*20), (int)(accentCol.y*20), (int)(accentCol.z*20), 180),
+        IM_COL32((int)(accentCol.x*20), (int)(accentCol.y*20), (int)(accentCol.z*20), 180),
+        IM_COL32((int)(accentCol.x*40), (int)(accentCol.y*40), (int)(accentCol.z*40), 180)
     );
     
     dl->ChannelsMerge();
 
+    // Simplified separator
     float sepX       = wp.x + sidebarW - closeBtnW;
     float sepCenterY = wp.y + sidebarH * 0.5f;
-    float sepHalfH   = sidebarH * 0.28f;
+    float sepHalfH   = sidebarH * 0.25f;
     dl->AddLine(
         ImVec2(sepX, sepCenterY - sepHalfH),
         ImVec2(sepX, sepCenterY + sepHalfH),
-        IM_COL32(70, 70, 85, 180), 1.5f
+        IM_COL32(70, 70, 85, 100), 1.0f
     );
 
+    // Close button
     float closePosX = (sidebarW - closeBtnW) + (closeBtnW - closeSize) * 0.5f;
     float closePosY = (sidebarH - closeSize) * 0.5f;
     SetCursorPos(ImVec2(closePosX, closePosY));
     {
         ImGuiWindow* win = GetCurrentWindow();
-        ImGuiID closeId  = win->GetID(O("##CloseMenu"));
+        ImGuiID closeId  = win->GetID(T("##CloseMenu"));
         ImVec2 closePos  = win->DC.CursorPos;
         ImRect closeBb(closePos, closePos + ImVec2(closeSize, closeSize));
         ItemSize(ImVec2(closeSize, closeSize), g.Style.FramePadding.y);
@@ -488,12 +651,12 @@ static void DrawSidebar(float sidebarW, ImVec2 screenSize) {
 
         float xCX = closeBb.Min.x + closeSize * 0.5f;
         float xCY = closeBb.Min.y + closeSize * 0.5f;
-        float xH  = closeSize * 0.35f;
+        float xH  = closeSize * 0.3f;
         ImU32 xCol = closeHovered 
-            ? IM_COL32(255, 100, 100, 240) 
-            : IM_COL32(180, 180, 190, 200);
-        dl->AddLine(ImVec2(xCX - xH, xCY - xH), ImVec2(xCX + xH, xCY + xH), xCol, 2.2f);
-        dl->AddLine(ImVec2(xCX + xH, xCY - xH), ImVec2(xCX - xH, xCY + xH), xCol, 2.2f);
+            ? IM_COL32(255, 100, 100, 200) 
+            : IM_COL32(180, 180, 190, 150);
+        dl->AddLine(ImVec2(xCX - xH, xCY - xH), ImVec2(xCX + xH, xCY + xH), xCol, 1.5f);
+        dl->AddLine(ImVec2(xCX + xH, xCY - xH), ImVec2(xCX - xH, xCY + xH), xCol, 1.5f);
     }
 
     SetCursorPos(ImVec2(0.0f, sidebarH));
@@ -574,98 +737,102 @@ static void DrawContentArea(float winW, float winH, ImVec2 screenSize) {
     
     ImDrawList* dl  = GetWindowDrawList();
     ImVec2      wp  = GetWindowPos();
-
-    float scaleFactor = screenSize.x <= 720.0f ? 0.75f : (screenSize.x <= 1080.0f ? 0.85f : 1.0f);
+ 
+    float scaleFactor = GetResponsiveFontScale(screenSize);
     float startY   = GetCursorPosY();
     float contentW = winW;
-
+ 
+    // Use theme background for content area
+    ImVec4 bgCol = g_menu.secondaryColor; // We'll use secondary as panel bg
+    bgCol.w = 0.8f; // Slightly transparent
     dl->AddRectFilled(
         ImVec2(wp.x, wp.y + startY),
         ImVec2(wp.x + contentW, wp.y + winH),
-        IM_COL32(15, 15, 18, 255), 16.0f * scaleFactor
+        IM_COL32((int)(bgCol.x*255), (int)(bgCol.y*255), (int)(bgCol.z*255), (int)(bgCol.w*255)), 16.0f * scaleFactor
     );
     
     const char* tabTitles[] = { 
-    O("Draw Settings"), 
-    O("Auto Play"), 
-    O("Auto Queue"), 
-    O("User") 
-};
-
+    T("draw_settings"), 
+    T("auto_play"), 
+    T("auto_queue"), 
+    T("user") 
+    };
+ 
     const char* currentTitle = tabTitles[g_menu.currentTab];
-    float titlePadT = 14.0f * scaleFactor;
-    float titlePadB = 10.0f * scaleFactor;
-
+    float titlePadT = 12.0f * scaleFactor;
+    float titlePadB = 8.0f * scaleFactor;
+ 
     SetWindowFontScale(1.0f * scaleFactor);
     ImVec2 ts = CalcTextSize(currentTitle);
-    
+     
     float centeredX = (contentW - ts.x) * 0.5f;
     SetCursorPos(ImVec2(centeredX, startY + titlePadT));
-    
+     
     ImVec4 accentCol = g_menu.accentColor;
     TextColored(ImVec4(accentCol.x, accentCol.y, accentCol.z, 1.0f), "%s", currentTitle);
     SetWindowFontScale(1.0f);
-
+ 
     float lineY = startY + titlePadT + ts.y + titlePadB;
+    // Use accent color for separator line with lower alpha
     dl->AddLine(
-        ImVec2(wp.x + 16.0f * scaleFactor, wp.y + lineY),
-        ImVec2(wp.x + contentW - 16.0f * scaleFactor, wp.y + lineY),
-        IM_COL32(70, 70, 85, 150), 1.0f
+        ImVec2(wp.x + 8.0f * scaleFactor, wp.y + lineY),
+        ImVec2(wp.x + contentW - 8.0f * scaleFactor, wp.y + lineY),
+        IM_COL32((int)(accentCol.x*255), (int)(accentCol.y*255), (int)(accentCol.z*255), 100), 1.0f
     );
-
-    float headerH = (lineY - startY) + 8.0f;
+ 
+    float headerH = (lineY - startY) + 6.0f;
     SetCursorPos(ImVec2(8.0f * scaleFactor, startY + headerH));
-    
+     
     PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
-    BeginChild(O("##ContentArea"), ImVec2(contentW - 16.0f * scaleFactor, winH - startY - headerH - 8.0f), false);
-    
+    BeginChild(T("##ContentArea"), ImVec2(contentW - 16.0f * scaleFactor, winH - startY - headerH - 8.0f), false);
+     
     switch (g_menu.currentTab) {
         case 0: {
             Dummy(ImVec2(0, 8 * scaleFactor));
-            need_save |= ToggleSwitch(O("Draw Lines"), &persistent_bool[O("bESP_DrawPredictionLine")], scaleFactor);
-            need_save |= ToggleSwitch(O("Draw Pockets"), &persistent_bool[O("bESP_DrawPocketsShotState")], scaleFactor);
-
+            need_save |= ToggleSwitch(T("draw_lines"), &persistent_bool[O("bESP_DrawPredictionLine")], scaleFactor);
+            need_save |= ToggleSwitch(T("draw_pockets"), &persistent_bool[O("bESP_DrawPocketsShotState")], scaleFactor);
+ 
             Dummy(ImVec2(0, 12 * scaleFactor));
-            TextColored(ImVec4(0.70f, 0.70f, 0.75f, 1.0f), O("Line Thickness"));
+            TextColored(ImVec4(0.70f, 0.70f, 0.75f, 1.0f), T("line_thickness"));
             Dummy(ImVec2(0, 6 * scaleFactor));
             {
                 if (persistent_int[O("iLineThickness")] < 1) persistent_int[O("iLineThickness")] = 4;
                 PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
                 PushStyleVar(ImGuiStyleVar_GrabRounding, 8.0f);
                 PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.12f, 0.12f, 0.15f, 1.0f));
-                PushStyleColor(ImGuiCol_SliderGrab, ImVec4(accentCol.x, accentCol.y, accentCol.z, 1.0f));
-                PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(accentCol.x * 0.8f, accentCol.y * 0.8f, accentCol.z * 0.8f, 1.0f));
+                PushStyleColor(ImGuiCol_SliderGrab, ImVec4(g_menu.accentCol.x, g_menu.accentCol.y, g_menu.accentCol.z, 1.0f));
+                PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(g_menu.accentCol.x * 0.8f, g_menu.accentCol.y * 0.8f, g_menu.accentCol.z * 0.8f, 1.0f));
                 SetNextItemWidth(GetContentRegionAvail().x);
-                need_save |= SliderInt(O("##lineThick"), &persistent_int[O("iLineThickness")], 1, 10, "%d");
+                need_save |= SliderInt(T("##lineThick"), &persistent_int[O("iLineThickness")], 1, 10, "%d");
                 PopStyleColor(3);
                 PopStyleVar(2);
             }
-
+ 
             Dummy(ImVec2(0, 12 * scaleFactor));
-            TextColored(ImVec4(0.70f, 0.70f, 0.75f, 1.0f), O("Fix Menu Size"));
+            TextColored(ImVec4(0.70f, 0.70f, 0.75f, 1.0f), T("fix_menu_size"));
             Dummy(ImVec2(0, 6 * scaleFactor));
             {
                 PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
                 PushStyleVar(ImGuiStyleVar_GrabRounding, 8.0f);
                 PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.12f, 0.12f, 0.15f, 1.0f));
-                PushStyleColor(ImGuiCol_SliderGrab, ImVec4(accentCol.x, accentCol.y, accentCol.z, 1.0f));
-                PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(accentCol.x * 0.8f, accentCol.y * 0.8f, accentCol.z * 0.8f, 1.0f));
+                PushStyleColor(ImGuiCol_SliderGrab, ImVec4(g_menu.accentCol.x, g_menu.accentCol.y, g_menu.accentCol.z, 1.0f));
+                PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(g_menu.accentCol.x * 0.8f, g_menu.accentCol.y * 0.8f, g_menu.accentCol.z * 0.8f, 1.0f));
                 SetNextItemWidth(GetContentRegionAvail().x);
                 int& menuSz = persistent_int[O("iMenuSizeOffset")];
-                bool changed = SliderInt(O("##menuSize"), &menuSz, -10, 10,
-                    menuSz == 0 ? O("Normal") : "%d");
+                bool changed = SliderInt(T("##menuSize"), &menuSz, -10, 10,
+                    menuSz == 0 ? T("Normal") : "%d");
                 need_save |= changed;
                 PopStyleColor(3);
                 PopStyleVar(2);
             }
-
+ 
             Dummy(ImVec2(0, 16 * scaleFactor));
             {
                 PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);
-                PushStyleColor(ImGuiCol_Button,        ImVec4(accentCol.x * 0.4f, accentCol.y * 0.4f, accentCol.z * 0.4f, 1.0f));
-                PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(accentCol.x * 0.5f, accentCol.y * 0.5f, accentCol.z * 0.5f, 1.0f));
-                PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(accentCol.x * 0.3f, accentCol.y * 0.3f, accentCol.z * 0.3f, 1.0f));
-                if (Button(O("Save Config"), ImVec2(GetContentRegionAvail().x, 45.0f * scaleFactor))) {
+                PushStyleColor(ImGuiCol_Button,        ImVec4(g_menu.accentCol.x * 0.4f, g_menu.accentCol.y * 0.4f, g_menu.accentCol.z * 0.4f, 1.0f));
+                PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(g_menu.accentCol.x * 0.5f, g_menu.accentCol.y * 0.5f, g_menu.accentCol.z * 0.5f, 1.0f));
+                PushStyleColor(ImGuiCol_ButtonActive,  ImVec4(g_menu.accentCol.x * 0.3f, g_menu.accentCol.y * 0.3f, g_menu.accentCol.z * 0.3f, 1.0f));
+                if (Button(T("save_config"), ImVec2(GetContentRegionAvail().x, 45.0f * scaleFactor))) {
                     svConfig_Save();
                 }
                 PopStyleColor(3);
@@ -673,122 +840,21 @@ static void DrawContentArea(float winW, float winH, ImVec2 screenSize) {
             }
             break;
         }
-        
+         
         case 1: {
-            Dummy(ImVec2(0, 8 * scaleFactor));
-            need_save |= ToggleSwitch(O("Enable AutoPlay"), &persistent_bool[O("bAutoPlay")], scaleFactor);
-            
-            Dummy(ImVec2(0, 16 * scaleFactor));
-            TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), O("Auto play will automatically"));
-            TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), O("aim and shoot for you"));
+            // AutoPlay tab removed - placeholder
+            Dummy(ImVec2(0, 20 * scaleFactor));
+            TextColored(ImVec4(0.7f, 0.7f, 0.8f, 1.0f), "Feature removed");
             break;
         }
-        
+         
         case 2: {
-            Dummy(ImVec2(0, 8 * scaleFactor));
-            need_save |= ToggleSwitch(O("Enable AutoQueue"), &persistent_bool[O("bAutoQueue")], scaleFactor);
-            Dummy(ImVec2(0, 16 * scaleFactor));
-            
-            TextColored(ImVec4(0.70f, 0.70f, 0.75f, 1.0f), O("Mode"));
-            Dummy(ImVec2(0, 6 * scaleFactor));
-            PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
-            PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12, 10));
-            PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.12f, 0.12f, 0.15f, 1.0f));
-            PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.16f, 0.16f, 0.20f, 1.0f));
-            SetNextItemWidth(GetContentRegionAvail().x);
-            need_save |= Combo("##mode", &persistent_int["iAutoQueue_Mode"], "Last Selected\0Smart\0Fix Table\0");
-            PopStyleColor(2);
-            PopStyleVar(2);
-            
-            if (persistent_int["iAutoQueue_Mode"] == 1) {
-                Dummy(ImVec2(0, 12 * scaleFactor));
-                TextColored(ImVec4(0.70f, 0.70f, 0.75f, 1.0f), O("Bet Percent"));
-                Dummy(ImVec2(0, 6 * scaleFactor));
-                PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
-                PushStyleVar(ImGuiStyleVar_GrabRounding, 8.0f);
-                PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.12f, 0.12f, 0.15f, 1.0f));
-                PushStyleColor(ImGuiCol_SliderGrab, ImVec4(accentCol.x, accentCol.y, accentCol.z, 1.0f));
-                PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(accentCol.x * 0.8f, accentCol.y * 0.8f, accentCol.z * 0.8f, 1.0f));
-                SetNextItemWidth(GetContentRegionAvail().x);
-                need_save |= SliderInt("##betpercent", &persistent_int["iAutoQueue_BetPercent"], 1, 100, "%d%%");
-                PopStyleColor(3);
-                PopStyleVar(2);
-            }
-
-            if (persistent_int["iAutoQueue_Mode"] == 2) {
-                Dummy(ImVec2(0, 12 * scaleFactor));
-                TextColored(ImVec4(0.70f, 0.70f, 0.75f, 1.0f), O("Select Table"));
-                Dummy(ImVec2(0, 6 * scaleFactor));
-
-                struct TableEntry { const char* label; ImU32 bg; ImU32 bgHov; };
-                static const TableEntry tables[17] = {
-                    { "100",   IM_COL32( 55,  90, 200, 255), IM_COL32( 75, 110, 220, 255) },
-                    { "200",   IM_COL32( 40, 150,  65, 255), IM_COL32( 55, 170,  80, 255) },
-                    { "1k",    IM_COL32( 55,  90, 200, 255), IM_COL32( 75, 110, 220, 255) },
-                    { "2.5k",  IM_COL32(130,  25,  25, 255), IM_COL32(155,  40,  40, 255) },
-                    { "10k",   IM_COL32( 35,  35,  38, 255), IM_COL32( 55,  55,  60, 255) },
-                    { "50k",   IM_COL32(110,   0,   0, 255), IM_COL32(135,  15,  15, 255) },
-                    { "100k",  IM_COL32(140, 140, 145, 255), IM_COL32(160, 160, 165, 255) },
-                    { "500k",  IM_COL32(185, 160,   0, 255), IM_COL32(210, 185,  10, 255) },
-                    { "1M",    IM_COL32( 20,  45, 130, 255), IM_COL32( 35,  60, 155, 255) },
-                    { "2M",    IM_COL32(190,  90,  15, 255), IM_COL32(215, 110,  30, 255) },
-                    { "5M",    IM_COL32(  0, 148, 110, 255), IM_COL32( 15, 170, 128, 255) },
-                    { "8M",    IM_COL32(165,  65,  65, 255), IM_COL32(185,  85,  85, 255) },
-                    { "10M",   IM_COL32( 18,  90,  35, 255), IM_COL32( 30, 112,  50, 255) },
-                    { "20M",   IM_COL32(100, 100, 110, 255), IM_COL32(120, 120, 130, 255) },
-                    { "30M",   IM_COL32(130,  15,  35, 255), IM_COL32(155,  30,  50, 255) },
-                    { "50M",   IM_COL32(  0, 148, 110, 255), IM_COL32( 15, 170, 128, 255) },
-                    { "200M",  IM_COL32( 20,  45, 130, 255), IM_COL32( 35,  60, 155, 255) },
-                };
-
-                int& selected = persistent_int["iAutoQueue_FixTable"];
-                float avail   = GetContentRegionAvail().x;
-                int   cols    = 4;
-                float gap     = 6.0f * scaleFactor;
-                float btnW    = (avail - gap * (cols - 1)) / cols;
-                float btnH    = 36.0f * scaleFactor;
-
-                PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
-                PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 5));
-
-                for (int i = 0; i < 17; i++) {
-                    if (i % cols != 0) SameLine(0, gap);
-
-                    bool isSel = (selected == i);
-                    ImU32 bgCol = isSel ? tables[i].bgHov : tables[i].bg;
-
-                    PushStyleColor(ImGuiCol_Button,        (ImU32)bgCol);
-                    PushStyleColor(ImGuiCol_ButtonHovered, (ImU32)tables[i].bgHov);
-                    PushStyleColor(ImGuiCol_ButtonActive,  (ImU32)tables[i].bgHov);
-                    PushStyleColor(ImGuiCol_Text,          isSel ? IM_COL32(255,255,255,255) : IM_COL32(220,220,220,200));
-
-                    char btnId[32];
-                    snprintf(btnId, sizeof(btnId), "%s##ft%d", tables[i].label, i);
-                    if (Button(btnId, ImVec2(btnW, btnH))) {
-                        selected = i;
-                        need_save = true;
-                    }
-
-                    if (isSel) {
-                        ImVec2 p = GetItemRectMin();
-                        ImVec2 q = GetItemRectMax();
-                        GetWindowDrawList()->AddRect(p, q, IM_COL32(255,255,255,200), 8.0f, 0, 2.0f);
-                    }
-
-                    PopStyleColor(4);
-                }
-
-                PopStyleVar(2);
-            }
-
-            if (persistent_int["iAutoQueue_Mode"] == 0) {
-                Dummy(ImVec2(0, 12 * scaleFactor));
-                TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), O("You will be auto queued to"));
-                TextColored(ImVec4(0.5f, 0.5f, 0.55f, 1.0f), O("the last game mode you played"));
-            }
+            // AutoQueue tab removed - placeholder
+            Dummy(ImVec2(0, 20 * scaleFactor));
+            TextColored(ImVec4(0.7f, 0.7f, 0.8f, 1.0f), "Feature removed");
             break;
         }
-
+         
         case 3: {
             auto DrawSectionHeader = [&](const char* title) {
                 Dummy(ImVec2(0, 10 * scaleFactor));
@@ -806,15 +872,15 @@ static void DrawContentArea(float winW, float winH, ImVec2 screenSize) {
                 TextColored(ImVec4(0.55f, 0.55f, 0.65f, 1.0f), "%s", title);
                 Dummy(ImVec2(0, 4 * scaleFactor));
             };
-
+ 
             auto DrawInfoRow = [&](const char* key, const char* val) {
                 TextColored(ImVec4(0.55f, 0.55f, 0.65f, 1.0f), "%s", key);
                 SameLine();
                 TextColored(ImVec4(0.90f, 0.90f, 0.95f, 1.0f), "%s", val);
                 Dummy(ImVec2(0, 3 * scaleFactor));
             };
-
-            DrawSectionHeader(O("Device"));
+ 
+            DrawSectionHeader(T("device"));
             {
                 static char s_manufacturer[PROP_VALUE_MAX] = {};
                 static char s_model[PROP_VALUE_MAX]        = {};
@@ -828,17 +894,17 @@ static void DrawContentArea(float winW, float winH, ImVec2 screenSize) {
                     __system_property_get("ro.build.version.release", s_android);
                     s_props_loaded = true;
                 }
-                DrawInfoRow(O("Manufacturer: "), s_manufacturer);
-                DrawInfoRow(O("Model:        "), s_model);
-                DrawInfoRow(O("ABI:          "), s_abi);
-                DrawInfoRow(O("Android:      "), s_android);
+                DrawInfoRow(T("manufacturer"), s_manufacturer);
+                DrawInfoRow(T("model"), s_model);
+                DrawInfoRow(T("abi"), s_abi);
+                DrawInfoRow(T("android"), s_android);
             }
-
-            DrawSectionHeader(O("Bradar's Cheat"));
+ 
+            DrawSectionHeader(T("bradar_s_cheat"));
             {
                 int64_t now_ts   = (int64_t)time(nullptr);
                 int64_t diff     = EXPIRY_TS - now_ts;
-
+ 
                 char expireBuf[64];
                 if (diff > 0) {
                     int64_t totalSecs = diff;
@@ -847,17 +913,78 @@ static void DrawContentArea(float winW, float winH, ImVec2 screenSize) {
                     int mins  = (int)((totalSecs % 3600)  / 60);
                     snprintf(expireBuf, sizeof(expireBuf), "%dd - %dh - %dm", days, hours, mins);
                 } else {
-                    snprintf(expireBuf, sizeof(expireBuf), "%s", O("Expired"));
+                    snprintf(expireBuf, sizeof(expireBuf), "%s", T("expired"));
                 }
-
-                DrawInfoRow(O("Expire:       "), expireBuf);
+ 
+                DrawInfoRow(T("expire"), expireBuf);
                 Dummy(ImVec2(0, 5 * scaleFactor));
-                TextColored(ImVec4(0.0f, 1.f, 0.0f, 1.0f), O("Owner : @profambatukam"));
+                TextColored(ImVec4(0.0f, 1.f, 0.0f, 1.0f), T("owner"));
                 Dummy(ImVec2(0, 6 * scaleFactor));
                 PushTextWrapPos(GetContentRegionAvail().x + GetCursorPosX());
                 TextColored(ImVec4(1.f, 0.f, 0.f, 1.0f),
-                    O("Beware of Scammers. This is a FREE BETA version, if you bought this version it means you got scammed."));
+                    T("beware_scammers"));
                 PopTextWrapPos();
+            }
+            
+            // Theme and Language Settings
+            DrawSectionHeader(T("settings"));
+            {
+                // Language selector
+                TextColored(ImVec4(0.70f, 0.70f, 0.75f, 1.0f), T("language"));
+                Dummy(ImVec2(0, 6 * scaleFactor));
+                PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+                PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12, 10));
+                PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.12f, 0.12f, 0.15f, 1.0f));
+                PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.16f, 0.16f, 0.20f, 1.0f));
+                SetNextItemWidth(GetContentRegionAvail().x);
+                
+                // Language combo
+                const char* language_items[] = {
+                    T("language_english"), 
+                    T("language_indonesian"),
+                    T("language_spanish"),
+                    T("language_portuguese"),
+                    T("language_turkish"),
+                    T("language_vietnamese")
+                };
+                int& langCombo = *(int*)(&g_currentLanguage); // Hack to use enum as int for combo
+                bool lang_changed = Combo(T("##language_combo"), &langCombo, 
+                                        language_items[0], language_items[1], language_items[2], 
+                                        language_items[3], language_items[4], language_items[5]);
+                if (lang_changed) {
+                    g_currentLanguage = static_cast<Language>(langCombo);
+                    need_save = true; // Save language preference
+                }
+                PopStyleColor(2);
+                PopStyleVar(2);
+                
+                Dummy(ImVec2(0, 12 * scaleFactor));
+                
+                // Theme selector
+                TextColored(ImVec4(0.70f, 0.70f, 0.75f, 1.0f), T("theme"));
+                Dummy(ImVec2(0, 6 * scaleFactor));
+                PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+                PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12, 10));
+                PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.12f, 0.12f, 0.15f, 1.0f));
+                PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.16f, 0.16f, 0.20f, 1.0f));
+                SetNextItemWidth(GetContentRegionAvail().x);
+                
+                // Theme combo
+                const char* theme_items[] = {
+                    T("theme_default"), 
+                    T("theme_neon_red"),
+                    T("theme_deep_ocean"),
+                    T("theme_midnight_purple"),
+                    T("theme_gold_edition")
+                };
+                bool theme_changed = Combo(T("##theme_combo"), &g_currentTheme, 
+                                         theme_items[0], theme_items[1], theme_items[2], 
+                                         theme_items[3], theme_items[4]);
+                if (theme_changed) {
+                    need_save = true; // Save theme preference
+                }
+                PopStyleColor(2);
+                PopStyleVar(2);
             }
             break;
         }
@@ -871,6 +998,9 @@ static void DrawContentArea(float winW, float winH, ImVec2 screenSize) {
 
 INLINE void DrawMenu(ImGuiIO& io) {
     if ((!g_Token.empty() && !g_Auth.empty() && g_Token == g_Auth) || DEBUG_BYPASS_LOGIN) {
+        // Apply current theme
+        ApplyTheme();
+        
         if (is_segv_handler_active()) {
             jump_buffer_active = 1;
             if (!sigsetjmp(jump_buffer, 1)) DrawESP(GetBackgroundDrawList());
@@ -898,8 +1028,11 @@ INLINE void DrawMenu(ImGuiIO& io) {
             SetNextWindowSize(ImVec2(winW, winH), ImGuiCond_Always);
             SetNextWindowPos(ImVec2(io.DisplaySize.x / 2.0f, io.DisplaySize.y / 2.0f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
             
-            PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.08f, 0.08f, 0.10f, 0.f));
-            PushStyleVar(ImGuiStyleVar_WindowRounding, 14.0f);
+            // Use theme for window background with alpha
+            ImVec4 bgCol = g_menu.secondaryColor; // Using secondary as base
+            bgCol.w = 0.0f; // Start transparent, alpha will be applied via style var
+            PushStyleColor(ImGuiCol_WindowBg, bgCol);
+            PushStyleVar(ImGuiStyleVar_WindowRounding, 16.0f);
             PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
             PushStyleVar(ImGuiStyleVar_Alpha, g_menu.menuAlpha);
@@ -908,7 +1041,7 @@ INLINE void DrawMenu(ImGuiIO& io) {
                                         ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
                                         ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
             
-            if (Begin(O("##MainMenu"), &g_menu.isOpen, winFlags)) {
+            if (Begin(T("##MainMenu"), &g_menu.isOpen, winFlags)) {
                 DrawSidebar(winW, io.DisplaySize);
                 DrawContentArea(winW, winH, io.DisplaySize);
             }
@@ -920,67 +1053,15 @@ INLINE void DrawMenu(ImGuiIO& io) {
     }
 }
 
-// Moved from AutoPlay namespace — plays/pauses autoplay (cancelMode=false)
-// or cancels autoqueue (cancelMode=true)
-static void DrawToggleButton(bool cancelMode) {
-    ImGuiIO& io = GetIO();
 
-    static GLuint play_on_tex       = LoadTextureFromMemory(play_on_png,       play_on_png_len);
-    static GLuint play_off_tex      = LoadTextureFromMemory(play_off_png,       play_off_png_len);
-    static GLuint queue_cancel_tex  = LoadTextureFromMemory(play_on_png,   play_on_png_len);
-
-    float scaleFactor = io.DisplaySize.x <= 720.0f ? 0.7f : (io.DisplaySize.x <= 1080.0f ? 0.85f : 1.0f);
-    float button_size   = 100.f * scaleFactor;
-    float winPadX       = GetStyle().WindowPadding.x;
-    float winPadY       = GetStyle().WindowPadding.y;
-    float windowWidth   = button_size + winPadX * 2.0f;
-    float windowHeight  = button_size + winPadY * 2.0f;
-
-    const float rightMargin  = 12.0f * scaleFactor;
-    float fixedX = io.DisplaySize.x - rightMargin - windowWidth;
-
-    if (g_sideBtnsY == 0.0f)
-        g_sideBtnsY = io.DisplaySize.y - 16.0f * scaleFactor - windowHeight;
-
-    SetNextWindowSize(ImVec2(windowWidth, windowHeight), ImGuiCond_Always);
-    SetNextWindowPos(ImVec2(fixedX, g_sideBtnsY), ImGuiCond_Always);
-
-    PushStyleColor(ImGuiCol_WindowBg, IM_COL32(0, 0, 0, 0));
-    PushStyleColor(ImGuiCol_Border,   IM_COL32(0, 0, 0, 0));
-    PushStyleVar(ImGuiStyleVar_WindowRounding, 99.0f);
-
-    if (Begin(O("##ToggleBtn"), nullptr,
-              ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-              ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove)) {
-
-        ImVec2 pos    = GetCursorScreenPos();
-        ImVec2 size(button_size, button_size);
-        ImVec2 center(pos.x + size.x * 0.5f, pos.y + size.y * 0.5f);
-
-        bool clicked = InvisibleButton(O("##TglBtnHit"), size);
-
-        GLuint tex = cancelMode ? queue_cancel_tex : play_off_tex;
-
-        float r = size.x * 0.5f;
-        ImDrawList* dl = GetWindowDrawList();
-        
-        ImVec4 accentCol = g_menu.accentColor;
-        dl->AddCircleFilled(center, r + 2, IM_COL32((int)(accentCol.x*80), (int)(accentCol.y*80), (int)(accentCol.z*80), 150), 0);
-        
-        dl->AddImage((void*)(intptr_t)tex,
-            ImVec2(center.x - r + 2, center.y - r + 2),
-            ImVec2(center.x + r - 2, center.y + r - 2));
-
-        if (IsItemActive() && IsMouseDragging(ImGuiMouseButton_Left)) {
-            g_sideBtnsY += io.MouseDelta.y;
-            g_sideBtnsY = ImClamp(g_sideBtnsY, 0.0f, io.DisplaySize.y - windowHeight);
-            SetWindowPos(ImVec2(fixedX, g_sideBtnsY), ImGuiCond_Always);
-        }
 
         if (clicked) {
             if (cancelMode) {
                 persistent_bool[O("bAutoQueue")] = false;
                 g_aqCounting = false;
+            } else {
+                // Toggle autoplay
+                persistent_bool[O("bAutoPlay")] = !persistent_bool[O("bAutoPlay")];
             }
         }
     }
@@ -993,11 +1074,11 @@ static void DrawFloatingButton(ImGuiIO& io) {
     static GLuint logo_tex   = LoadTextureFromMemory(logo_png, logo_png_len);
     static bool   isDragging = false;
 
-    float scaleFactor = io.DisplaySize.x <= 720.0f ? 0.65f : (io.DisplaySize.x <= 1080.0f ? 0.8f : 1.0f);
-    float buttonRadius = 50.0f * scaleFactor;
+    float scaleFactor = GetResponsiveFontScale(io);
+    float buttonRadius = 48.0f * scaleFactor; // Slightly smaller for better proportion
     float buttonSize   = buttonRadius * 2.0f;
     float winSize      = buttonSize + 8.0f;
-    float margin       = 6.0f;
+    float margin       = 6.0f * scaleFactor;
 
     float toggleWinH = GetFrameHeight() * 1.5f + GetStyle().WindowPadding.y * 2.0f;
     const float rightMargin = 12.0f * scaleFactor;
@@ -1015,7 +1096,7 @@ static void DrawFloatingButton(ImGuiIO& io) {
     PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-    if (Begin(O("##FloatBtn"), nullptr,
+    if (Begin(T("##FloatBtn"), nullptr,
               ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar |
               ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings)) {
 
@@ -1023,7 +1104,7 @@ static void DrawFloatingButton(ImGuiIO& io) {
         ImVec2      center = ImVec2(fixedX + buttonRadius + 4, posY + buttonRadius + 4);
 
         SetCursorPos(ImVec2(0, 0));
-        InvisibleButton(O("##FloatBtnHit"), ImVec2(winSize, winSize));
+        InvisibleButton(T("##FloatBtnHit"), ImVec2(winSize, winSize));
 
         ImVec4 accentCol = g_menu.accentColor;
         dl->AddCircleFilled(center, buttonRadius + 3, IM_COL32(
@@ -1056,12 +1137,12 @@ static bool first_time = true;
 INLINE void DrawLogin(ImGuiIO& io) {
     if (logged_in) return DrawMenu(io);
 
-    float scaleFactor = io.DisplaySize.x <= 720.0f ? 0.7f : (io.DisplaySize.x <= 1080.0f ? 0.85f : 1.0f);
+    float scaleFactor = GetResponsiveFontScale(io);
 
     SetNextWindowPos(ImVec2(0, 0));
     SetNextWindowSize(io.DisplaySize);
     PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.03f, 0.03f, 0.05f, 0.98f));
-    Begin(O("##Overlay"), nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBringToFrontOnFocus);
+    Begin(T("##Overlay"), nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBringToFrontOnFocus);
     PopStyleColor();
 
     float cardW = 380.0f * scaleFactor;
@@ -1075,7 +1156,7 @@ INLINE void DrawLogin(ImGuiIO& io) {
     PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-    Begin(O("##LoginCard"), nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
+    Begin(T("##LoginCard"), nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar);
 
     ImDrawList* dl = GetWindowDrawList();
     ImVec2 winPos = GetWindowPos();
@@ -1088,12 +1169,12 @@ INLINE void DrawLogin(ImGuiIO& io) {
         IM_COL32((int)(accentCol.x*255), (int)(accentCol.y*255), (int)(accentCol.z*255), 255), 16.0f, ImDrawFlags_RoundCornersTop);
 
     SetWindowFontScale(1.2f * scaleFactor);
-    ImVec2 titleSize = CalcTextSize(O("Bradar's Cheat"));
-    dl->AddText(ImVec2(winPos.x + (cardW - titleSize.x) * 0.5f, winPos.y + 22.0f * scaleFactor), IM_COL32(255, 255, 255, 255), O("Bradar's Cheat"));
+    ImVec2 titleSize = CalcTextSize(T("bradar_s_cheat"));
+    dl->AddText(ImVec2(winPos.x + (cardW - titleSize.x) * 0.5f, winPos.y + 22.0f * scaleFactor), IM_COL32(255, 255, 255, 255), T("bradar_s_cheat"));
     SetWindowFontScale(1.0f);
     
-    ImVec2 subSize = CalcTextSize(O("Free Mod"));
-    dl->AddText(ImVec2(winPos.x + (cardW - subSize.x) * 0.5f, winPos.y + 52.0f * scaleFactor), IM_COL32(200, 220, 255, 180), O("Free Mod"));
+    ImVec2 subSize = CalcTextSize(T("free_mod"));
+    dl->AddText(ImVec2(winPos.x + (cardW - subSize.x) * 0.5f, winPos.y + 52.0f * scaleFactor), IM_COL32(200, 220, 255, 180), T("free_mod"));
 
     SetCursorPosY(100.0f * scaleFactor);
 
@@ -1124,16 +1205,16 @@ INLINE void DrawLogin(ImGuiIO& io) {
             dl->AddCircleFilled(dotPos, 5.0f * scaleFactor, IM_COL32((int)(accentCol.x*255), (int)(accentCol.y*255), (int)(accentCol.z*255), (int)(alpha * 255)));
         }
 
-        ImVec2 loadingSize = CalcTextSize(O("Authenticating..."));
+        ImVec2 loadingSize = CalcTextSize(T("authenticating"));
         SetCursorPosX((cardW - loadingSize.x) * 0.5f);
         SetCursorPosY(230.0f * scaleFactor);
-        TextColored(ImVec4(0.6f, 0.6f, 0.65f, 1.0f), O("Authenticating..."));
+        TextColored(ImVec4(0.6f, 0.6f, 0.65f, 1.0f), T("authenticating"));
     } else {
         SetCursorPosY(125.0f * scaleFactor);
         
-        ImVec2 infoSize = CalcTextSize(O("Copy your license key and tap login"));
+        ImVec2 infoSize = CalcTextSize(T("copy_license_key"));
         SetCursorPosX((cardW - infoSize.x) * 0.5f);
-        TextColored(ImVec4(0.55f, 0.55f, 0.6f, 1.0f), O("Copy your license key and tap login"));
+        TextColored(ImVec4(0.55f, 0.55f, 0.6f, 1.0f), T("copy_license_key"));
         
         Dummy(ImVec2(0, 35.0f * scaleFactor));
         
@@ -1145,7 +1226,7 @@ INLINE void DrawLogin(ImGuiIO& io) {
         PushStyleColor(ImGuiCol_ButtonActive, ImVec4(accentCol.x * 0.9f, accentCol.y * 0.9f, accentCol.z * 0.9f, 1.0f));
         PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
         
-     if (AutoLogin || Button("LGNBTN", ImVec2(cardW - 50.0f * scaleFactor, 50.0f * scaleFactor))) {
+      if (AutoLogin || Button(T("login"), ImVec2(cardW - 50.0f * scaleFactor, 50.0f * scaleFactor))) {
     if (DEBUG_BYPASS_LOGIN) {
         logged_in = true;
         g_menu.isOpen = true;
@@ -1153,9 +1234,9 @@ INLINE void DrawLogin(ImGuiIO& io) {
         JNIEnv* env;
         jint getEnvResult = VM->GetEnv((void**)&env, JNI_VERSION_1_6);
         if (getEnvResult == JNI_EDETACHED) {
-            if (VM->AttachCurrentThread(&env, nullptr) != 0) ERROR_MESSAGE = O("Failed to attach thread to JVM");
+            if (VM->AttachCurrentThread(&env, nullptr) != 0) ERROR_MESSAGE = T("failed_to_attach_thread");
         } else if (getEnvResult != JNI_OK) {
-            ERROR_MESSAGE = O("Failed to get JNIEnv");
+            ERROR_MESSAGE = T("failed_to_get_jni_env");
         } else {
             std::thread([](std::string androidId, std::string key) {
                 Login(androidId, key);
@@ -1164,15 +1245,15 @@ INLINE void DrawLogin(ImGuiIO& io) {
         first_time = false;
     }
 }
-        
+         
         PopStyleVar();
         PopStyleColor(3);
-        
+         
         Dummy(ImVec2(0, 25.0f * scaleFactor));
-        
-        ImVec2 helpSize = CalcTextSize(O("Your will read"));
+         
+        ImVec2 helpSize = CalcTextSize(T("your_will_read"));
         SetCursorPosX((cardW - helpSize.x) * 0.5f);
-        TextColored(ImVec4(0.42f, 0.42f, 0.48f, 1.0f), O("Your will read"));
+        TextColored(ImVec4(0.42f, 0.42f, 0.48f, 1.0f), T("your_will_read"));
     }
 
     End();
