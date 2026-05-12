@@ -470,7 +470,6 @@ INLINE void DrawExpired(ImGuiIO& io) {
 
 #include "mod/ButtonClicker.h"
 
-static void DrawToggleButton(bool cancelMode); // forward declaration — defined after DrawFloatingButton
 
 INLINE void DrawESP(ImDrawList* draw) {
     if ((!g_Token.empty() && !g_Auth.empty() && g_Token == g_Auth) || DEBUG_BYPASS_LOGIN) {
@@ -521,10 +520,7 @@ INLINE void DrawESP(ImDrawList* draw) {
         GameStateManager gameStateManager = sharedGameManager.mStateManager;
         if (!gameStateManager) return;
 
-        if (persistent_bool[O("bAutoPlay")]) {
-            DrawToggleButton(false);
-      //      AutoPlay::Update();
-        }
+        //      AutoPlay::Update();
         //if (persistent_bool[O("bAutoAim")]) AutoAim::AIM();
 
         auto stateId = gameStateManager.getCurrentStateId();
