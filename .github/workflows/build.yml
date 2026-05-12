@@ -26,13 +26,16 @@ jobs:
 
       - name: Install NDK
         run: |
-          echo "y" | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --install "ndk;24.0.8215888"
+          echo "y" | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --install "ndk;24.0.8215888" --sdk_root=${ANDROID_SDK_ROOT}
 
       - name: Build native library
         run: |
           chmod +x gradlew
           export ANDROID_NDK_HOME=${ANDROID_SDK_ROOT}/ndk/24.0.8215888
           export PATH=${ANDROID_NDK_HOME}:${PATH}
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME"
+          echo "ndk-build location: $(which ndk-build || echo 'not found')"
           ./gradlew :app:buildOnlyLibrary --no-daemon
 
       - name: Upload library.so
