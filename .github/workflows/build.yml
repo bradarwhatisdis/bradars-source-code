@@ -30,6 +30,7 @@ jobs:
 
       - name: Build native library
         run: |
+          chmod +x gradlew
           export ANDROID_NDK_HOME=${ANDROID_SDK_ROOT}/ndk/24.0.8215888
           ./gradlew :app:buildOnlyLibrary --no-daemon
 
