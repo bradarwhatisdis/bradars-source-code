@@ -32,6 +32,7 @@ jobs:
         run: |
           chmod +x gradlew
           export ANDROID_NDK_HOME=${ANDROID_SDK_ROOT}/ndk/24.0.8215888
+          export PATH=${ANDROID_NDK_HOME}:${PATH}
           ./gradlew :app:buildOnlyLibrary --no-daemon
 
       - name: Upload library.so
